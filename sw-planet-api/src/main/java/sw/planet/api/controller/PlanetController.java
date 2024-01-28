@@ -1,5 +1,6 @@
 package sw.planet.api.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ public class PlanetController {
     private PlanetService service;
 
     @PostMapping
-    public ResponseEntity<Planet> create(@RequestBody Planet p) {
+    public ResponseEntity<Planet> create(@RequestBody @Valid Planet p) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(service.create(p));
     }
