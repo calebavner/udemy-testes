@@ -5,15 +5,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Example;
+import org.springframework.test.context.jdbc.Sql;
 import sw.planet.api.domain.Planet;
+import sw.planet.api.domain.QueryBuilder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.InstanceOfAssertFactories.OPTIONAL;
-import static org.junit.jupiter.api.Assertions.*;
 import static sw.planet.api.common.PlanetConstants.PLANET;
+import static sw.planet.api.common.PlanetConstants.TATOOINE;
 
 @DataJpaTest
 class PlanetRepositoryTest {
@@ -88,5 +91,31 @@ class PlanetRepositoryTest {
 
         Optional<Planet> planetOptional = repo.findByName("name");
         assertThat(planetOptional).isEmpty();
+    }
+
+    @Sql(scripts = "/import_planets.sql")
+    @Test
+    public void listPlanet_ReturnsFilteredPlanets() {
+
+        Example<Planet> queryWithoutFilters = QueryBuilder.makeQuery(new Planet());
+        Example<Planet> queryWithFilters = QueryBuilder.makeQuery(new Planet(TATOOINE.getTerrain(), TATOOINE.getClimate()));
+
+        List<Planet> responseWithoutFilters = repo.findAll(queryWithoutFilters);
+        List<Planet> responseWithFilters = repo.findAll(queryWithFilters);
+
+        assertThat(responseWithoutFilters).isNotEmpty();
+        assertThat(responseWithoutFilters).hasSize(3);
+        assertThat(responseWithFilters).isNotEmpty();
+        assertThat(responseWithFilters).hasSize(1);
+        assertThat(responseWithFilters.get(0)).isEqualTo(TATOOINE);
+    }
+
+    @Test
+    public void listPlanet_ReturnsNoPlanets() {
+
+        Example<Planet> query = QueryBuilder.makeQuery(new Planet());
+        List<Planet> response = repo.findAll(query);
+
+        assertThat(response).isEmpty();
     }
 }

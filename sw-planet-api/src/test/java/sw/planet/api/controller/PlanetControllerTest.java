@@ -11,6 +11,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import sw.planet.api.domain.Planet;
 import sw.planet.api.service.PlanetService;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -115,12 +117,17 @@ class PlanetControllerTest {
 
         mockMvc.perform(get("/planets?" + String.format("terrain=%s&climate=%s", TATOOINE.getTerrain(), TATOOINE.getClimate())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(TATOOINE))
-                .andExpect(jsonPath("$[0]", hasSize(1)));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0]").value(TATOOINE));
     }
 
     @Test
     public void listPlanet_ReturnsNoPlanets() throws Exception{
 
+        when(service.list(null, null)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/planets"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
     }
 }
