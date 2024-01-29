@@ -1,13 +1,17 @@
 package sw.planet.api.repo;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import sw.planet.api.domain.Planet;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.OPTIONAL;
 import static org.junit.jupiter.api.Assertions.*;
 import static sw.planet.api.common.PlanetConstants.PLANET;
 
@@ -17,6 +21,11 @@ class PlanetRepositoryTest {
     private PlanetRepository repo;
     @Autowired
     private TestEntityManager testManager;
+
+    @AfterEach
+    public void afterEach() {
+        PLANET.setId(null);
+    }
 
     @Test
     public void createPlanet_WithValidData_ReturnsPlanet() {
@@ -46,7 +55,38 @@ class PlanetRepositoryTest {
         testManager.detach(p);
         p.setId(null);
 
-
         assertThatThrownBy(() -> repo.save(p)).isInstanceOf(RuntimeException.class);
+    }
+
+    @Test
+    public void getPlanet_WithExistingdId_ReturnPlanet() {
+
+        Planet p = testManager.persistFlushFind(PLANET);
+        Optional<Planet> planetOptional = repo.findById(p.getId());
+
+        assertThat(planetOptional).isNotEmpty();
+        assertThat(planetOptional.get()).isEqualTo(p);
+    }
+
+    @Test
+    public void getPlanet_WithUnexistingdId_ReturnNotFound() {
+
+        Optional<Planet> planetOptional = repo.findById(1L);
+        assertThat(planetOptional).isEmpty();
+    }
+
+    @Test void getPlanet_WithValidName_ReturnsPlanet() {
+
+        Planet p = testManager.persistFlushFind(PLANET);
+        Optional<Planet> planetOptional = repo.findByName(p.getName());
+
+        assertThat(planetOptional).isNotEmpty();
+        assertThat(planetOptional.get()).isEqualTo(p);
+    }
+
+    @Test void getPlanet_WithInvalidName_ReturnsNotFound() {
+
+        Optional<Planet> planetOptional = repo.findByName("name");
+        assertThat(planetOptional).isEmpty();
     }
 }
