@@ -43,7 +43,7 @@ public class PlanetController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remove(@PathVariable Long id) {
+    public ResponseEntity<Void> remove(@PathVariable @Valid Long id) {
         service.remove(id);
         return ResponseEntity.noContent().build();
     }
