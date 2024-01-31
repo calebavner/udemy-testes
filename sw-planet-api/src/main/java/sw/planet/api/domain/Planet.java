@@ -3,6 +3,7 @@ package sw.planet.api.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import sw.planet.api.jacoco.ExcludeFromJacocoGeneratedReport;
 
 @Entity
 @Table(name = "planets")
@@ -71,7 +72,7 @@ public class Planet {
     public void setTerrain(String terrain) {
         this.terrain = terrain;
     }
-
+    @ExcludeFromJacocoGeneratedReport
     @Override
     public boolean equals(Object obj) {
         return EqualsBuilder.reflectionEquals(obj, this);
